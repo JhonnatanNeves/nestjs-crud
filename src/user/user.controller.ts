@@ -16,7 +16,7 @@ import { User } from './interfaces/user.interface';
 import { ValidationPipe } from '../common/pipes/validation.pipe';
 import { UserService } from './user.service';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

@@ -18,13 +18,12 @@ export class UserService {
 
   async findOne(id: string): Promise<any> {
     try {
-      return await this.userModel.findById(id);
+      return await this.userModel.findOne({ _id: id });
     } catch (e) {
       return e;
     }
   }
 
-  @UsePipes(ValidationPipe)
   async create(userDto: UserDto): Promise<any> {
     try {
       return await this.userModel.create({ ...userDto });
@@ -33,10 +32,9 @@ export class UserService {
     }
   }
 
-  @UsePipes(ValidationPipe)
   async update(id: string, userDto: UserDto): Promise<any> {
     try {
-      return await this.userModel.findByIdAndUpdate(id, userDto);
+      return await this.userModel.findOneAndUpdate({ _id: id }, userDto);
     } catch (e) {
       return e;
     }
@@ -44,7 +42,7 @@ export class UserService {
 
   async remove(id: string): Promise<any> {
     try {
-      return await this.userModel.findByIdAndDelete(id);
+      return await this.userModel.findOneAndDelete({ _id: id });
     } catch (e) {
       return e;
     }
