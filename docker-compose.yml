@@ -11,3 +11,12 @@ services:
     ports:
         - 27017:27017
     command: mongod --smallfiles --logpath=/dev/null # --quiet
+  crossx_rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq1
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "test_cluster"
+    ports:
+      - 4369:4369
+      - 5672:5672
+      - 15672:15672

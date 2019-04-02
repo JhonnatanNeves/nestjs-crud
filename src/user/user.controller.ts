@@ -15,31 +15,21 @@ import { UserDto } from './dto/user.dto';
 import { User } from './interfaces/user.interface';
 import { ValidationPipe } from '../common/pipes/validation.pipe';
 import { UserService } from './user.service';
-import { ClientProxy, Client, Transport } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
+// import { ClientProxy, Client, Transport } from '@nestjs/microservices';
+// import { Observable } from 'rxjs';
 
 @Controller('users')
 export class UserController {
-  @Client({ transport: Transport.RMQ })
-  private client: ClientProxy;
-
   constructor(private readonly userService: UserService) {}
-
-  async getPlayerProfile(): Promise<any> {
-    try {
-      const posts = await this.userService.findAll();
-      return posts;
-    } catch (e) {
-      return e;
-    }
-  }
 
   @Get()
   async findAll(@Query() query: UserDto, @Res() res): Promise<any> {
-    const pattern = { cmd: 'getPlayerProfile' };
-    const data = {};
-    const fdsfdsfsd = await this.client.send(pattern, data);
-    console.log(fdsfdsfsd);
+    try {
+      const posts = await this.userService.findAll();
+      return res.status(HttpStatus.OK).json(posts);
+    } catch (e) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(e);
+    }
   }
 
   @Get(':id')
