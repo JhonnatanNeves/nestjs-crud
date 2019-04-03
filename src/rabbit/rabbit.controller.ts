@@ -14,6 +14,7 @@ import {
   Client,
   ClientProxy,
   MessagePattern,
+  EventPattern,
 } from '@nestjs/microservices';
 import { Observable, from } from 'rxjs';
 import { UserDto } from 'src/user/dto/user.dto';
@@ -24,56 +25,45 @@ import { UserService } from 'src/user/user.service';
 export class RabbitController {
   @Client({
     transport: Transport.RMQ,
-    // options: {
-    //   urls: [`amqp://localhost:5672`],
-    //   queue: 'my_queue',
-    //   // queueOptions: { durable: false },
-    // },
+    options: {
+      urls: [`amqp://localhost:5672`],
+      queue: 'my_queue',
+      queueOptions: { durable: false },
+    },
   })
   client: ClientProxy;
 
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  getHello(): Observable<number> {
-    // const pattern = { cmd: 'sumObservable' };
-    // const pattern = { cmd: 'sumAsync' };
-    const pattern = { cmd: 'sum' };
-    const data = [1, 2, 3];
-
-    const r = this.client.send<number>(pattern, data);
-
-    return r;
+  getHello(): Observable<any> {
+    const pattern = { cmd: 'users' };
+    const data = '';
+    return this.client.send(pattern, data);
   }
 
-  @MessagePattern({ cmd: 'sum' })
-  sum(data: number[]): number {
-    return data.reduce((acc, el) => acc + el);
+  @MessagePattern({ cmd: 'users' })
+  findAll(@Res() res): Observable<any> {
+    try {
+      return from(this.userService.findAll());
+    } catch (e) {
+      return from(e);
+    }
   }
 
   @Post()
-  @UsePipes(ValidationPipe)
-  create(@Body() userDto: UserDto, @Res() res): Observable<User> {
-    const pattern = { cmd: 'createUser' };
+  getCreate(@Body() userDto: UserDto): Observable<any> {
+    const pattern = { cmd: 'create-user' };
     const data = userDto;
-
-    const post = this.client.send<UserDto>(pattern, data);
-    // const post = this.userService.create(userDto);
-    return res.status(HttpStatus.OK).json(post);
+    return this.client.send(pattern, data);
   }
 
-  @MessagePattern({ cmd: 'createUser' })
-  createUser(data: UserDto): any {
-    return this.userService.create(data);
-  }
-
-  // @MessagePattern({ cmd: 'sum' })
-  // async accumulate(data: number[]): Promise<number> {
-  //   return (data || []).reduce((a, b) => a + b);
-  // }
-
-  // @MessagePattern({ cmd: 'sum' })
-  // sumObservable(data: number[]): Observable<number> {
-  //   return from([1, 2, 3]);
+  // @MessagePattern({ cmd: 'create-user' })
+  // createUser(data): Observable<any> {
+  //   try {
+  //     return from(this.userService.create(data));
+  //   } catch (e) {
+  //     return from(e);
+  //   }
   // }
 }

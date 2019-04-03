@@ -15,6 +15,8 @@ import { UserDto } from './dto/user.dto';
 import { User } from './interfaces/user.interface';
 import { ValidationPipe } from '../common/pipes/validation.pipe';
 import { UserService } from './user.service';
+import { MessagePattern } from '@nestjs/microservices';
+import { Observable, from } from 'rxjs';
 // import { ClientProxy, Client, Transport } from '@nestjs/microservices';
 // import { Observable } from 'rxjs';
 
@@ -42,14 +44,23 @@ export class UserController {
     }
   }
 
-  @Post()
-  @UsePipes(ValidationPipe)
-  async create(@Body() userDto: UserDto, @Res() res): Promise<User> {
+  // @Post()
+  // @UsePipes(ValidationPipe)
+  // async create(@Body() userDto: UserDto, @Res() res): Promise<User> {
+  //   try {
+  //     const post = await this.userService.create(userDto);
+  //     return res.status(HttpStatus.OK).json(post);
+  //   } catch (e) {
+  //     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(e);
+  //   }
+  // }
+
+  @MessagePattern({ cmd: 'create-user' })
+  createUser(data): Observable<any> {
     try {
-      const post = await this.userService.create(userDto);
-      return res.status(HttpStatus.OK).json(post);
+      return from(this.userService.create(data));
     } catch (e) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(e);
+      return from(e);
     }
   }
 
